@@ -2,6 +2,10 @@
 
 Work hours manager written in C++.
 
+### Supported OS
+
+- Linux
+
 ### Build
 
 Dependencies:
