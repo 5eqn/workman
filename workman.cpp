@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <iostream>
 #include <string>
+#include <sys/stat.h>
 #include <vector>
 
 using namespace std;
@@ -17,8 +18,21 @@ struct Work {
 
 vector<Work> works;
 
+string get_file_path() {
+  string file_path;
+  char *home_dir = getenv("HOME");
+  file_path = string(home_dir) + "/.local/share/workman/works.txt";
+  struct stat info;
+  if (stat(file_path.c_str(), &info) != 0) {
+    // Directory does not exist, create it
+    mkdir(file_path.substr(0, file_path.find_last_of('/')).c_str(),
+          S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+  }
+  return file_path;
+}
+
 void save_works() {
-  ofstream file("works.txt");
+  ofstream file(get_file_path());
   if (file.is_open()) {
     file << works.size() << endl;
     for (Work work : works) {
@@ -38,7 +52,7 @@ void save_works() {
 }
 
 void load_works() {
-  ifstream file("works.txt");
+  ifstream file(get_file_path());
   if (file.is_open()) {
     works.clear();
     int num_works;
@@ -124,6 +138,18 @@ void end_work(string name, string end_time_str) {
     }
   }
   cout << "Work not found" << endl;
+}
+
+void delete_work(string name) {
+  for (auto it = works.begin(); it != works.end(); ++it) {
+    if (it->name == name) {
+      works.erase(it);
+      save_works();
+      cout << "Work \"" << name << "\" deleted." << endl;
+      return;
+    }
+  }
+  cerr << "Work \"" << name << "\" not found." << endl;
 }
 
 void print_stats() {
@@ -213,6 +239,13 @@ int main(int argc, char *argv[]) {
       end_time_str = argv[3];
     }
     end_work(name, end_time_str);
+  } else if (command == "delete" || command == "d") {
+    if (argc < 3) {
+      cerr << "Usage: " << argv[0] << " d[elete] <work_name>" << endl;
+      return 1;
+    }
+    string name = argv[2];
+    delete_work(name);
   } else if (command == "stats" || command == "s") {
     print_stats();
   } else {
