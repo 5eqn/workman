@@ -113,7 +113,7 @@ void begin_work(string name, string start_time_str) {
   for (Work &work : works) {
     if (work.name == name) {
       work.start_times.push_back(start_time);
-      cout << "Work started" << endl;
+      cout << "Work begun" << endl;
       save_works();
       return;
     }
@@ -206,6 +206,7 @@ int main(int argc, char *argv[]) {
     cout << "  s[tats]: Print stats" << endl;
     cout << "  b[egin] <work_name> [start_time in hh:mm]: Begin a work" << endl;
     cout << "  e[nd] <work_name> [end_time in hh:mm]: End a work" << endl;
+    cout << "  d[elete] <work_name>: Delete a work" << endl;
     return 0;
   }
   string command = argv[1];
@@ -241,7 +242,7 @@ int main(int argc, char *argv[]) {
     end_work(name, end_time_str);
   } else if (command == "delete" || command == "d") {
     if (argc < 3) {
-      cerr << "Usage: " << argv[0] << " d[elete] <work_name>" << endl;
+      cerr << "Usage: workman d[elete] <work_name>" << endl;
       return 1;
     }
     string name = argv[2];

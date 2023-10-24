@@ -28,4 +28,5 @@ Commands:
   s[tats]: Print stats
   b[egin] <work_name> [start_time in hh:mm]: Begin a work
   e[nd] <work_name> [end_time in hh:mm]: End a work
+  d[elete] <work_name>: Delete a work
 ```
