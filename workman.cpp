@@ -112,6 +112,10 @@ void begin_work(string name, string start_time_str) {
   time_t start_time = read_time(start_time_str);
   for (Work &work : works) {
     if (work.name == name) {
+      if (work.start_times.size() == work.end_times.size() + 1) {
+        cout << "Work already started" << endl;
+        return;
+      }
       work.start_times.push_back(start_time);
       cout << "Work begun" << endl;
       save_works();
