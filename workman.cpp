@@ -157,13 +157,22 @@ void delete_work(string name) {
 }
 
 void print_stats() {
+  // Get start of today
+  time_t today = time(nullptr);
+  tm *today_tm = localtime(&today);
+  today_tm->tm_hour = 0;
+  today_tm->tm_min = 0;
+  today_tm->tm_sec = 0;
+  today = mktime(today_tm);
+
+  // Iterate all works
   for (Work work : works) {
     cout << work.name << endl;
-    cout << "Total hours: " << fixed << setprecision(2) << work.total_hours
-         << endl;
+
     if (work.start_times.empty()) {
       cout << "No working hours" << endl;
     } else {
+      // Get start of the first day
       time_t first_day = work.start_times.front();
       tm *first_day_tm = localtime(&first_day);
       first_day_tm->tm_hour = 0;
@@ -171,32 +180,41 @@ void print_stats() {
       first_day_tm->tm_sec = 0;
       first_day = mktime(first_day_tm);
 
-      time_t last_day = work.end_times.back();
-      tm *last_day_tm = localtime(&last_day);
-      last_day_tm->tm_hour = 23;
-      last_day_tm->tm_min = 59;
-      last_day_tm->tm_sec = 59;
-      last_day = mktime(last_day_tm);
-
+      // Get total hours
       double total_hours = 0;
       for (int i = 0; i < (int)work.start_times.size(); i++) {
         time_t start_time = work.start_times[i];
-        time_t end_time = work.end_times[i];
+        time_t end_time;
+        if (i < (int)work.end_times.size()) {
+          end_time = work.end_times[i];
+        } else {
+          end_time = time(nullptr);
+        }
         total_hours += difftime(end_time, start_time) / 3600.0;
       }
+      cout << "Total hours: " << fixed << setprecision(2) << total_hours
+           << endl;
       cout << "Average hours per day: " << fixed << setprecision(2)
-           << total_hours / difftime(last_day, first_day) * 86400 << endl;
+           << total_hours / (difftime(today, first_day) + 86400) * 86400
+           << endl;
+
+      // Accumulate time of today
       double past_hours = 0;
       for (int i = work.start_times.size() - 1; i >= 0; i--) {
         time_t start_time = work.start_times[i];
-        time_t end_time = work.end_times[i];
-        if (difftime(time(nullptr), start_time) < 604800) {
+        time_t end_time;
+        if (i < (int)work.end_times.size()) {
+          end_time = work.end_times[i];
+        } else {
+          end_time = time(nullptr);
+        }
+        if (difftime(start_time, today) > 0) {
           past_hours += difftime(end_time, start_time) / 3600.0;
         } else {
           break;
         }
       }
-      cout << "Past 7 days: " << fixed << setprecision(2) << past_hours << endl;
+      cout << "Today: " << fixed << setprecision(2) << past_hours << endl;
     }
   }
 }
